@@ -28,6 +28,26 @@ type ChatMessage struct {
 	originData []byte   // 原始消息对象
 }
 
+func NewChatMessage(data json.RawMessage) (msg ChatMessage, err error) {
+	originData, err := data.MarshalJSON()
+	if err != nil {
+		return msg, err
+	}
+	var baseMessage BaseMessage
+	err = json.Unmarshal(originData, &baseMessage)
+	if err != nil {
+		return msg, err
+	}
+
+	msg.Id = baseMessage.MsgID
+	msg.From = baseMessage.From
+	msg.ToList = baseMessage.ToList
+	msg.Action = baseMessage.Action
+	msg.Type = baseMessage.MsgType
+	msg.originData = originData
+	return
+}
+
 // Unmarshal the origin data into map[string]interface{}
 func (c ChatMessage) GetOriginMessage() (msg map[string]interface{}) {
 	_ = json.Unmarshal(c.originData, &msg)
